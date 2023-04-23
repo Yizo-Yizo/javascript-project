@@ -13,20 +13,23 @@ let selectedCategory;
 let selectedPrice;
 
 function showPage(page) {
-  alert('count in showPage(): '+ page)
+
   toPage = page;
   let start = (page - 1) * productsPerPage;
   let end = start + productsPerPage;
 
-  alert('Filter type in showPage: ' + _filterType);
-  alert('Selected category: ' + selectedCategory);
-  alert('Selected price: ' + selectedPrice);
+  let select = document.getElementById("categorySelection");
+  rawdata[0].prodType.productCategory.forEach(product => {
+    const option = document.createElement("option");
+    option.value = product.prodTypeId;
+    option.text = product.categoryName;
+    select.add(option);
+  })
+
   if ((_filterType == 'category' && selectedCategory != 0)|| (_filterType == 'price' && selectedPrice != 0)) {
-    alert('In the if condition')
     paginatedProducts = filteredProducts;
   }
   else {
-    alert('In the else statement ' + start +' , '+ end );
     if ( currentPage <= 1){
       start = 0;
       end = 23;
@@ -42,7 +45,6 @@ function showPage(page) {
 
 function filter(filterType) {
   _filterType = filterType;
-  alert('Filter type in filterType: ' + filterType);
   var categorySelection = document.getElementById('categorySelection');
   selectedCategory = categorySelection.options[categorySelection.selectedIndex].value;
 
@@ -133,14 +135,19 @@ function prevPage() {
 function sort(sort) {
   if (sort == 'ascending'){
     paginatedProducts.sort((a, b) => a.price - b.price);
+    updateUI(paginatedProducts);
   }
   else if (sort == 'descending'){
     paginatedProducts.sort((a, b) => b.price - a.price);
+    updateUI(paginatedProducts);
   }
   else {
-
+    _filterType = null;
+    selectedCategory = 0;
+    selectedPrice = 0;
+    showPage(1);
   }
-  updateUI(paginatedProducts);
+  
 }
 
 showPage(currentPage);
