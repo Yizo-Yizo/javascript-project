@@ -24,7 +24,7 @@ function showPage(page) {
     option.value = product.prodTypeId;
     option.text = product.categoryName;
     select.add(option);
-  })
+  });
 
   if ((_filterType == 'category' && selectedCategory != 0)|| (_filterType == 'price' && selectedPrice != 0)) {
     paginatedProducts = filteredProducts;
@@ -142,10 +142,7 @@ function sort(sort) {
     updateUI(paginatedProducts);
   }
   else {
-    _filterType = null;
-    selectedCategory = 0;
-    selectedPrice = 0;
-    showPage(1);
+    location.reload(true);
   }
   
 }
