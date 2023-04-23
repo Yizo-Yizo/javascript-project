@@ -25,10 +25,6 @@ function showPage(page) {
     alert('In the if condition')
     paginatedProducts = filteredProducts;
   }
-  // else if ((_filterType == 'category' && selectedCategory == 0) || (_filterType == 'price' && selectedPrice == 0)) {
-  //   alert('In the else if condition')
-  //   paginatedProducts = rawdata.slice(start, end);
-  // }
   else {
     alert('In the else statement ' + start +' , '+ end );
     if ( currentPage <= 1){
@@ -39,17 +35,6 @@ function showPage(page) {
     else {
       paginatedProducts = rawdata.slice(start, end);
     }
-    // if (start == -23 || start == NaN){
-    //   alert('In the else, if')
-    //   start = 0;
-    //   end = 23;
-    //   paginatedProducts = rawdata.slice(start, end);
-    // }
-    // else {
-    //   alert('In the else, else')
-    //   paginatedProducts = rawdata.slice(start, end);
-    // }
-    
   }
 
   updateUI(paginatedProducts);
