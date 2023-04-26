@@ -5,4 +5,9 @@ img {
   text-decoration: none;
   color: black;
   font-weight: bold;
+  padding-left: 20px;
+}
+.navbar {
+  max-width: 1520px;
+  margin: 0 auto;
 }
