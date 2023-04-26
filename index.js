@@ -3,8 +3,9 @@
 var paginatedProducts = [];
 var allProducts = [];
 var filteredProducts = [];
+var allProductsWithMedia = [];
 
-const productsPerPage = 23;
+const productsPerPage = 20;
 let currentPage = 1;
 let toPage = 1;
 
@@ -14,6 +15,8 @@ let selectedPrice;
 
 function showPage(page) {
 
+  var items = productsWithMedia();
+
   toPage = page;
   let start = (page - 1) * productsPerPage;
   let end = start + productsPerPage;
@@ -21,7 +24,7 @@ function showPage(page) {
   let select = document.getElementById("categorySelection");
   rawdata[0].prodType.productCategory.forEach(product => {
     const option = document.createElement("option");
-    option.value = product.prodTypeId;
+    option.value = product.categoryId;
     option.text = product.categoryName;
     select.add(option);
   });
@@ -32,12 +35,11 @@ function showPage(page) {
   else {
     if ( currentPage <= 1){
       start = 0;
-      end = 23;
-      paginatedProducts = rawdata.slice(start, end);
+      end = 20;
+      
+      paginatedProducts = items.slice(start, end);
     }
-    else {
-      paginatedProducts = rawdata.slice(start, end);
-    }
+    paginatedProducts = items.slice(start, end);
   }
 
   updateUI(paginatedProducts);
@@ -57,43 +59,63 @@ function filter(filterType) {
   allProducts = [];
   filteredProducts = [];
 
-  for (const data of rawdata)  {
+  var items = productsWithMedia();
+  var uniqueItems = [...new Set(items)];
+  for (const data of uniqueItems)  {
     if (selectedCategory === '0' || data.categoryId == selectedCategory) {
-      if (filterType === 'category' || (filterType === 'price' && checkPrice(data, selectedPrice))) {
+      if ((filterType === 'category' && checkPrice(data, selectedPrice)) || (filterType === 'price' && checkPrice(data, selectedPrice))) {
         allProducts.push(data);
       }
     }
   }
 
+  alert('allProducts.legnth: ' + allProducts.length);
+
   let products = [];
-  if (allProducts.length < 23){
+  if (allProducts.length < 20){
     products = allProducts;
   }
-  else{
-    products = allProducts.slice(start, end);
+  else {
+    if (isNaN(start)){
+      products = allProducts.slice(0, 20);
+    }
+    else {
+      products = allProducts.slice(start, end);
+    }
   }
 
   for (const product of products) {
     filteredProducts.push(product);
   }
 
-  showPage(filteredProducts);
+  updateUI(filteredProducts);
+  
+}
 
-  function checkPrice(data, selectedPrice) {
-    switch(selectedPrice) {
-      case '0':
-        return true;
-      case '1':
-        return data.price > 0 && data.price <= 100;
-      case '2':
-        return data.price > 100 && data.price <= 500;
-      case '3':
-        return data.price > 500 && data.price <= 1000;
-      case '4':
-        return data.price > 1000;
-      default:
-        return false;
+function productsWithMedia() {
+  for (const data of rawdata) {
+    if (data.productMedia[0]) {
+      allProductsWithMedia.push(data);
     }
+  }
+
+  return allProductsWithMedia;
+}
+
+function checkPrice(data, selectedPrice) {
+  switch(selectedPrice) {
+    case '0':
+      return true;
+    case '1':
+      return data.price > 0 && data.price <= 100;
+    case '2':
+      return data.price > 100 && data.price <= 500;
+    case '3':
+      return data.price > 500 && data.price <= 1000;
+    case '4':
+      return data.price > 1000;
+    default:
+      return false;
   }
 }
 
@@ -103,8 +125,7 @@ function updateUI(products) {
   let data = '<div class="row">';
 
   for (const product of products) {
-    if (product.productMedia[0]){
-      data += 
+    data += 
       `<div class="col-md-3">
         <a href="./details.html?productDescription=${product.description}&productTitle=${product.title}&productPrice=${product.price}&productImage=${product.productMedia[0].url}" style="max-width: 261px">
           <img src="https://storage.googleapis.com/luxe_media/wwwroot/${product.productMedia[0].url}" alt="" style="width: 100%">
@@ -114,7 +135,6 @@ function updateUI(products) {
         <hr/>
       </div>
       `;
-    }
   }
 
   data += '</div>';
