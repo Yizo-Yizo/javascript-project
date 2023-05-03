@@ -5,21 +5,31 @@ var allProducts = [];
 var filteredProducts = [];
 var allProductsWithMedia = [];
 
-const productsPerPage = 20;
+const productsPerPage = 12;
 let currentPage = 1;
 let toPage = 1;
+let mediaProducts = productsWithMedia().length;
+let allPages = Math.ceil(mediaProducts / productsPerPage);
+
 
 let _filterType;
 let selectedCategory;
 let selectedPrice;
 
-function showPage(page) {
 
+function showPage(page) {
+  console.log("Clicked chevron")
+  console.log('Inside showPage() page = ' + page)
+  console.log('currentPage = ' + currentPage)
+  console.log('Typeof: ' + typeof(page))
   var items = productsWithMedia();
 
+  console.log('Items: ' + items.length)
   toPage = page;
   let start = (page - 1) * productsPerPage;
   let end = start + productsPerPage;
+  console.log('start: ' + start)
+  console.log('end: ' + end)
 
   let select = document.getElementById("categorySelection");
   rawdata[0].prodType.productCategory.forEach(product => {
@@ -33,14 +43,22 @@ function showPage(page) {
     paginatedProducts = filteredProducts;
   }
   else {
-    if ( currentPage <= 1){
+    if (page <= 1){
       start = 0;
-      end = 20;
-      
+      end = 12;
+      paginatedProducts = [];
       paginatedProducts = items.slice(start, end);
     }
+
+    paginatedProducts = [];
     paginatedProducts = items.slice(start, end);
+    console.log('PaginatedProducts: ' + paginatedProducts.length)
   }
+
+  for (const product of paginatedProducts){
+    console.log(product.title)
+  }
+  console.log('Before updateUI(paginatedProducts): ' + paginatedProducts.length)
 
   updateUI(paginatedProducts);
 }
@@ -69,15 +87,15 @@ function filter(filterType) {
     }
   }
 
-  alert('allProducts.legnth: ' + allProducts.length);
+  console.log('allProducts.legnth: ' + allProducts.length);
 
   let products = [];
-  if (allProducts.length < 20){
+  if (allProducts.length < 12){
     products = allProducts;
   }
   else {
     if (isNaN(start)){
-      products = allProducts.slice(0, 20);
+      products = allProducts.slice(0, 12);
     }
     else {
       products = allProducts.slice(start, end);
@@ -121,10 +139,11 @@ function checkPrice(data, selectedPrice) {
 
 
 function updateUI(products) {
-
+  console.log("In the updateUI")
   let data = '<div class="row">';
 
   for (const product of products) {
+    console.log(product.title)
     data += 
       `<div class="col-md-3">
         <a href="./details.html?productDescription=${product.description}&productTitle=${product.title}&productPrice=${product.price}&productImage=${product.productMedia[0].url}" style="max-width: 261px">
@@ -167,4 +186,47 @@ function sort(sort) {
   
 }
 
-showPage(currentPage);
+const ul = document.querySelector('ul');
+
+function elem(allPages, currentPage) {
+  
+  let li = '';
+
+  let beforePages = currentPage - 1;
+  let afterPages = currentPage + 1;
+  let liActive;
+
+  if (currentPage > 1) {
+    li += `<li class="btn" onclick="elem(${allPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
+  }
+
+  for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
+
+    if (productsPerPage > allPages){
+      continue;
+    }
+    if (productsPerPage == 0){
+      productsPerPage = productsPerPage + 1;
+    }
+
+    if (currentPage == productsPerPage){
+      liActive = 'active';
+    }else {
+      liActive = '';
+    }
+
+    li += `<li class="numb ${liActive}" onclick="elem(${allPages}, ${productsPerPage})"><span>${productsPerPage}</span></li>`;
+  }
+
+  if (currentPage < allPages){
+    li += `<li class="btn" onclick="elem(${allPages}, ${currentPage+1})"><i class="bi bi-chevron-right"></i></li>`;
+  }
+
+  ul.innerHTML = li;
+  console.log('Last part: ' + currentPage);
+  showPage(currentPage);
+}
+
+//showPage(currentPage);
+elem(allPages, currentPage);
+
