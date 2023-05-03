@@ -188,7 +188,7 @@ function sort(sort) {
 
 const ul = document.querySelector('ul');
 
-function elem(allPages, currentPage) {
+function pagination(allPages, currentPage) {
   
   let li = '';
 
@@ -197,7 +197,7 @@ function elem(allPages, currentPage) {
   let liActive;
 
   if (currentPage > 1) {
-    li += `<li class="btn" onclick="elem(${allPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
+    li += `<li class="btn" onclick="pagination(${allPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
   }
 
   for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
@@ -215,11 +215,11 @@ function elem(allPages, currentPage) {
       liActive = '';
     }
 
-    li += `<li class="numb ${liActive}" onclick="elem(${allPages}, ${productsPerPage})"><span>${productsPerPage}</span></li>`;
+    li += `<li class="numb ${liActive}" onclick="pagination(${allPages}, ${productsPerPage})"><span>${productsPerPage}</span></li>`;
   }
 
   if (currentPage < allPages){
-    li += `<li class="btn" onclick="elem(${allPages}, ${currentPage+1})"><i class="bi bi-chevron-right"></i></li>`;
+    li += `<li class="btn" onclick="pagination(${allPages}, ${currentPage+1})"><i class="bi bi-chevron-right"></i></li>`;
   }
 
   ul.innerHTML = li;
@@ -228,5 +228,5 @@ function elem(allPages, currentPage) {
 }
 
 //showPage(currentPage);
-elem(allPages, currentPage);
+pagination(allPages, currentPage);
 

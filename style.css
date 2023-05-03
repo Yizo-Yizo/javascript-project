@@ -11,3 +11,42 @@ img {
   max-width: 1520px;
   margin: 0 auto;
 }
+
+.wrapper ul {
+  display: flex;
+  align-items: center;
+}
+
+.wrapper ul li {
+  list-style-type: none;
+  padding: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.wrapper ul li span {
+  color: #0D6EFD;
+}
+
+.wrapper ul li.numb {
+  height: 10px;
+  width: 10px;
+  border: 1px solid gray;
+  justify-content: center;
+}
+
+.wrapper ul li.btn {
+  height: 10px;
+  width: 10px;
+  border: 1px solid gray;
+  justify-content: center;
+}
+
+.wrapper ul li.btn:hover {
+  background-color: lightgray;
+}
+
+.wrapper ul li.active {
+  background-color: lightgray;
+}

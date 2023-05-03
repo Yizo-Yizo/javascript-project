@@ -14,3 +14,6 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('productImage').src = 'https://storage.googleapis.com/luxe_media/wwwroot/' + productImage;
 });
 
+function goBack() {
+  window.history.back();
+}
