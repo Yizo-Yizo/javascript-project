@@ -12,14 +12,37 @@ let mediaProducts = productsWithMedia().length;
 let allPages = Math.ceil(mediaProducts / productsPerPage);
 let numbOfPages = allPages;
 let isFiltered = false;
+let selectedSort = '';
 
+const ul = document.querySelector('ul');
 
 let _filterType;
-let selectedCategory;
-let selectedPrice;
+let selectedCategory = 0;
+let selectedPrice = 0;
 
+pagination(numbOfPages, currentPage);
 
+function updateQueryParams(){
+
+  const queryParams = new URLSearchParams();
+  if (selectedCategory !== '0') {
+    queryParams.set('categoryId', selectedCategory);
+  }
+  if (selectedPrice !== '0') {
+    queryParams.set('priceRange', selectedPrice);
+  }
+
+  if (selectedSort) {
+    queryParams.set('sort', selectedSort);
+  }
+  const url = new URL(window.location.href);
+  url.search = queryParams.toString();
+  history.pushState({}, '', url.toString());
+
+}
 function showPage(page) {
+
+  updateQueryParams()
 
   var items = productsWithMedia();
 
@@ -189,21 +212,20 @@ function updateUI(products) {
 // }
 
 function sort(sort) {
-  if (sort == 'ascending'){
+  if (sort == 'ascending') {
+    selectedSort = 'ascending';
     paginatedProducts.sort((a, b) => a.price - b.price);
     updateUI(paginatedProducts);
-  }
-  else if (sort == 'descending'){
+  } else if (sort == 'descending') {
+    selectedSort = 'descending';
     paginatedProducts.sort((a, b) => b.price - a.price);
     updateUI(paginatedProducts);
-  }
-  else {
+  } else {
+    selectedSort = '';
     location.reload(true);
   }
-  
+  updateQueryParams();
 }
-
-const ul = document.querySelector('ul');
 
 function pagination(numbOfPages, currentPage) {
   
@@ -243,6 +265,31 @@ function pagination(numbOfPages, currentPage) {
   showPage(currentPage);
 }
 
+window.addEventListener('load', function () {
+  const url = new URL(window.location.href);
+
+  // Retrieve the query parameters from the URL
+  const categoryId = url.searchParams.get('categoryId');
+  const priceRange = url.searchParams.get('priceRange');
+  const sort = url.searchParams.get('sort');
+
+  // Set the selected filters and sort based on the query parameters
+  selectedCategory = categoryId || '0';
+  selectedPrice = priceRange || '0';
+  selectedSort = sort || '';
+
+  // Update the filter dropdowns based on the selected values
+  document.getElementById('categorySelection').value = selectedCategory;
+  document.getElementById('priceSelection').value = selectedPrice;
+
+  // Trigger the filter and sort functions if the values are not the defaults
+  if (selectedCategory !== '0' || selectedPrice !== '0') {
+    filter(_filterType);
+  }
+  if (sort) {
+    sort(sort);
+  }
+});
 //showPage(currentPage);
-pagination(numbOfPages, currentPage);
+
 
