@@ -12,37 +12,67 @@ let mediaProducts = productsWithMedia().length;
 let allPages = Math.ceil(mediaProducts / productsPerPage);
 let numbOfPages = allPages;
 let isFiltered = false;
-let selectedSort = '';
+//let selectedSort = '';
 
 const ul = document.querySelector('ul');
 
 let _filterType;
-let selectedCategory = 0;
-let selectedPrice = 0;
+//let selectedCategory = 0;
+//let selectedPrice = 0;
 
 pagination(numbOfPages, currentPage);
 
-function updateQueryParams(){
+function updateQueryParams(selectedSort, selectedCategory, selectedPrice) {
+  const url = new URL(window.location.href);
+  const queryParams = new URLSearchParams(url.search);
 
-  const queryParams = new URLSearchParams();
-  if (selectedCategory !== '0') {
-    queryParams.set('categoryId', selectedCategory);
+  const existingCategory = queryParams.get('categoryId');
+  const newCategory = selectedCategory !== '0' && selectedCategory !== undefined ? selectedCategory : existingCategory;
+
+  let newPriceRange = selectedPrice !== '0' && selectedPrice !== undefined ? selectedPrice : null;
+
+  if (newPriceRange !== null) {
+    queryParams.set('priceRange', newPriceRange);
+  } else {
+    queryParams.delete('priceRange');
   }
-  if (selectedPrice !== '0') {
-    queryParams.set('priceRange', selectedPrice);
+
+  if (newCategory !== null) {
+    queryParams.set('categoryId', newCategory);
+  } else {
+    queryParams.delete('categoryId');
   }
 
   if (selectedSort) {
     queryParams.set('sort', selectedSort);
+  } else {
+    queryParams.delete('sort');
   }
-  const url = new URL(window.location.href);
-  url.search = queryParams.toString();
-  history.pushState({}, '', url.toString());
 
+  url.search = queryParams.toString();
+  window.history.pushState({}, '', url.toString());
+  console.log(`url.search = queryParams.toString(): ${url.search}`);
 }
+
+
 function showPage(page) {
 
-  updateQueryParams()
+  const url = new URL(window.location.href);
+  const queryParams = url.searchParams;
+
+  const selectedCategory = queryParams.get('categoryId') || '0';
+  const selectedPrice = queryParams.get('priceRange') || '0';
+  const selectedSort = queryParams.get('sort') || '';
+  // console.log(`url: ${url}`);
+  // console.log(`queryParams: ${queryParams}`);
+  // console.log(`selectedCategory: ${selectedCategory}`);
+  // console.log(`selectedPrice: ${selectedPrice}`);
+  // console.log(`selectedSort: ${selectedSort}`);
+
+  document.getElementById('categorySelection').value = selectedCategory;
+  document.getElementById('priceSelection').value = selectedPrice;
+
+  updateQueryParams(selectedSort, selectedCategory, selectedPrice)
 
   var items = productsWithMedia();
 
@@ -59,10 +89,6 @@ function showPage(page) {
   });
 
   if ((_filterType == 'category')|| (_filterType == 'price')) {
-    //paginatedProducts = filteredProducts;
-    console.log('if');
-    console.log(`filteredProducts: ${filteredProducts.length}`);
-    console.log(`start: ${start} end: ${end}`);
     if (page <= 1){
       start = 0; 
       end = 12;
@@ -74,7 +100,6 @@ function showPage(page) {
     }
   }
   else {
-    console.log('else')
     if (page <= 1){
       start = 0;
       end = 12;
@@ -85,29 +110,32 @@ function showPage(page) {
       paginatedProducts = items.slice(start, end);
     }
 
-    // paginatedProducts = [];
-    // paginatedProducts = items.slice(start, end);
   }
 
   updateUI(paginatedProducts);
-  // if (isFiltered == true && (selectedCategory != 0 || selectedPrice != 0)){
-  //   console.log(`isFiltered: ${isFiltered}`)
-  //   console.log('filteredProducts')
-  //   updateUI(filteredProducts);
-  // }else {
-  //   console.log('paginatedProducts')
-  //   updateUI(paginatedProducts);
-  // }
+
+  if (selectedSort == 'ascending' || selectedSort == 'descending' || selectedSort == 'reset'){
+    filter(selectedSort);
+  }
 }
 
 function filter(filterType) {
   isFiltered = true;
   _filterType = filterType;
   var categorySelection = document.getElementById('categorySelection');
-  selectedCategory = categorySelection.options[categorySelection.selectedIndex].value;
+  let selectedCategory = categorySelection.options[categorySelection.selectedIndex].value;
 
   var priceSelection = document.getElementById('priceSelection');
-  selectedPrice = priceSelection.options[priceSelection.selectedIndex].value;
+  let selectedPrice = priceSelection.options[priceSelection.selectedIndex].value;
+
+  let selectedSort;
+  if (_filterType == 'category' || _filterType == 'price') {
+    selectedSort = '';
+    updateQueryParams(selectedSort, selectedCategory, selectedPrice);
+  } else {
+    selectedSort = _filterType;
+    updateQueryParams(selectedSort, selectedCategory, selectedPrice);
+  }
 
   let start = (toPage - 1) * productsPerPage;
   let end = start + productsPerPage;
@@ -115,40 +143,56 @@ function filter(filterType) {
   allProducts = [];
   filteredProducts = [];
 
-  var items = productsWithMedia();
-  var uniqueItems = [...new Set(items)];
-  for (const data of uniqueItems)  {
-    if (selectedCategory === '0' || data.categoryId == selectedCategory) {
-      if ((filterType === 'category' && checkPrice(data, selectedPrice)) || (filterType === 'price' && checkPrice(data, selectedPrice))) {
-        allProducts.push(data);
+  if (filterType == 'category' || filterType == 'price'){
+    var items = productsWithMedia();
+    var uniqueItems = [...new Set(items)];
+    for (const data of uniqueItems)  {
+      if (selectedCategory === '0' || data.categoryId == selectedCategory) {
+        if ((filterType === 'category' && checkPrice(data, selectedPrice)) || (filterType === 'price' && checkPrice(data, selectedPrice))) {
+          allProducts.push(data);
+        }
       }
     }
-  }
 
-  let products = [];
-  if (allProducts.length < 12){
-    products = allProducts;
-  }
-  else {
-    if (isNaN(start)){
-      products = allProducts.slice(0, 12);
+    let products = [];
+    if (allProducts.length < 12){
+      products = allProducts;
     }
     else {
-      products = allProducts.slice(start, end);
+      if (isNaN(start)){
+        products = allProducts.slice(0, 12);
+      }
+      else {
+        products = allProducts.slice(start, end);
+      }
+    }
+
+    for (const product of products) {
+      filteredProducts.push(product);
+    }
+
+    if (selectedCategory != 0 || selectedPrice != 0){
+      numbOfPages = Math.ceil(allProducts.length / productsPerPage);
+    }else {
+      numbOfPages = allPages;
+    }
+    pagination(numbOfPages, currentPage);
+  }
+  else if (filterType == 'ascending' || filterType == 'descending' || filterType == 'reset') {
+    if (filterType == 'ascending') {
+      selectedSort = 'ascending';
+      paginatedProducts.sort((a, b) => a.price - b.price);
+      updateUI(paginatedProducts);
+    } else if (filterType == 'descending') {
+      selectedSort = 'descending';
+      paginatedProducts.sort((a, b) => b.price - a.price);
+      updateUI(paginatedProducts);
+    } else if (filterType == 'reset'){
+      selectedSort = '';
+      updateQueryParams(selectedSort, selectedCategory, selectedPrice);
+      //showPage(toPage);
     }
   }
-
-  for (const product of products) {
-    filteredProducts.push(product);
-  }
-
-  if (selectedCategory != 0 || selectedPrice != 0){
-    numbOfPages = Math.ceil(allProducts.length / productsPerPage);
-  }else {
-    numbOfPages = allPages;
-  }
-  //updateUI(filteredProducts);
-  pagination(numbOfPages, currentPage);
 }
 
 function productsWithMedia() {
@@ -178,7 +222,6 @@ function checkPrice(data, selectedPrice) {
   }
 }
 
-
 function updateUI(products) {
 
   let data = '<div class="row">';
@@ -201,32 +244,6 @@ function updateUI(products) {
   document.getElementById('target').innerHTML = data;
 }
 
-// function nextPage() {
-//   currentPage++;
-//   showPage(currentPage);
-// }
-
-// function prevPage() {
-//   currentPage--;
-//   showPage(currentPage);
-// }
-
-function sort(sort) {
-  if (sort == 'ascending') {
-    selectedSort = 'ascending';
-    paginatedProducts.sort((a, b) => a.price - b.price);
-    updateUI(paginatedProducts);
-  } else if (sort == 'descending') {
-    selectedSort = 'descending';
-    paginatedProducts.sort((a, b) => b.price - a.price);
-    updateUI(paginatedProducts);
-  } else {
-    selectedSort = '';
-    location.reload(true);
-  }
-  updateQueryParams();
-}
-
 function pagination(numbOfPages, currentPage) {
   
   let li = '';
@@ -240,7 +257,7 @@ function pagination(numbOfPages, currentPage) {
   }
 
   for (let productsPerPage = 0; productsPerPage <= numbOfPages; productsPerPage++){
-    console.log(`productsPerPage: ${productsPerPage} numbOfPages: ${numbOfPages}`)
+    
     if (productsPerPage > numbOfPages){
       continue;
     }
@@ -267,29 +284,26 @@ function pagination(numbOfPages, currentPage) {
 
 window.addEventListener('load', function () {
   const url = new URL(window.location.href);
+  const queryParams = new URLSearchParams(url.search);
+  let para = url.search.substring(1)
 
-  // Retrieve the query parameters from the URL
-  const categoryId = url.searchParams.get('categoryId');
-  const priceRange = url.searchParams.get('priceRange');
-  const sort = url.searchParams.get('sort');
+  const selectedCategory = queryParams.get('categoryId') || '0';
+  const selectedPrice = queryParams.get('priceRange') || '0';
+  const selectedSort = queryParams.get('sort') || '';
 
-  // Set the selected filters and sort based on the query parameters
-  selectedCategory = categoryId || '0';
-  selectedPrice = priceRange || '0';
-  selectedSort = sort || '';
+  console.log(`url: ${url}`);
+  console.log(`queryParams: ${queryParams}`);
+  console.log(`para: ${para}`);
 
-  // Update the filter dropdowns based on the selected values
   document.getElementById('categorySelection').value = selectedCategory;
   document.getElementById('priceSelection').value = selectedPrice;
 
-  // Trigger the filter and sort functions if the values are not the defaults
   if (selectedCategory !== '0' || selectedPrice !== '0') {
-    filter(_filterType);
+    filter(selectedCategory !== '0' ? 'category' : 'price');
   }
-  if (sort) {
-    sort(sort);
+  
+  if (selectedSort) {
+    filter(selectedSort);
   }
 });
-//showPage(currentPage);
-
 
