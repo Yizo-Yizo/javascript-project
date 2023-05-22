@@ -17,8 +17,6 @@ let isFiltered = false;
 const ul = document.querySelector('ul');
 
 let _filterType;
-//let selectedCategory = 0;
-//let selectedPrice = 0;
 
 pagination(numbOfPages, currentPage);
 
@@ -248,15 +246,15 @@ function pagination(numbOfPages, currentPage) {
   
   let li = '';
 
-  // let beforePages = currentPage - 1;
-  // let afterPages = currentPage + 1;
+  let beforePages = currentPage - 5;
+  let afterPages = currentPage + 5;
   let liActive;
 
   if (currentPage > 1) {
     li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
   }
 
-  for (let productsPerPage = 0; productsPerPage <= numbOfPages; productsPerPage++){
+  for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
     
     if (productsPerPage > numbOfPages){
       continue;
@@ -271,7 +269,7 @@ function pagination(numbOfPages, currentPage) {
       liActive = '';
     }
 
-    li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${productsPerPage})"><span>${productsPerPage}</span></li>`;
+    li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${currentPage})"><span>${productsPerPage}</span></li>`;
   }
 
   if (currentPage < numbOfPages){
