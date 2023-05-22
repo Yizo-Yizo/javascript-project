@@ -242,11 +242,54 @@ function updateUI(products) {
   document.getElementById('target').innerHTML = data;
 }
 
+// function pagination(numbOfPages, currentPage) {
+  
+//   let li = '';
+
+//   let beforePages = currentPage - 5;
+//   let afterPages = currentPage + 5;
+//   let liActive;
+
+//   if (currentPage > 1) {
+//     li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
+//   }
+
+//   for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
+    
+//     if (productsPerPage > numbOfPages){
+//       continue;
+//     }
+//     if (productsPerPage == 0){
+//       productsPerPage = productsPerPage + 1;
+//     }
+
+//     if (currentPage == productsPerPage){
+//       liActive = 'active';
+//     }else {
+//       liActive = '';
+//     }
+
+//     li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${currentPage})"><span>${productsPerPage}</span></li>`;
+//   }
+
+//   if (currentPage < numbOfPages){
+//     li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage+1})"><i class="bi bi-chevron-right"></i></li>`;
+//   }
+
+//   ul.innerHTML = li;
+//   showPage(currentPage);
+// }
+
 function pagination(numbOfPages, currentPage) {
   
   let li = '';
+  let beforePages;
 
-  let beforePages = currentPage - 5;
+  if (currentPage < 5){
+    beforePages = currentPage - 1;
+  }else {
+    beforePages = currentPage - 5;
+  }
   let afterPages = currentPage + 5;
   let liActive;
 
@@ -255,7 +298,7 @@ function pagination(numbOfPages, currentPage) {
   }
 
   for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
-    
+
     if (productsPerPage > numbOfPages){
       continue;
     }
@@ -269,7 +312,7 @@ function pagination(numbOfPages, currentPage) {
       liActive = '';
     }
 
-    li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${currentPage})"><span>${productsPerPage}</span></li>`;
+    li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${productsPerPage})"><span>${productsPerPage}</span></li>`;
   }
 
   if (currentPage < numbOfPages){
@@ -279,6 +322,7 @@ function pagination(numbOfPages, currentPage) {
   ul.innerHTML = li;
   showPage(currentPage);
 }
+
 
 window.addEventListener('load', function () {
   const url = new URL(window.location.href);
