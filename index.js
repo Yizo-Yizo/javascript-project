@@ -188,6 +188,9 @@ function filter(filterType) {
     } else if (filterType == 'reset'){
       selectedSort = '';
       updateQueryParams(selectedSort, selectedCategory, selectedPrice);
+      let c = document.URL.replace(window.location.search, '')
+      window.history.replaceState(history.state, '', c)
+      window.location.reload()
       //showPage(toPage);
     }
   }
