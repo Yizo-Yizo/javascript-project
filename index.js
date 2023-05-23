@@ -23,34 +23,35 @@ pagination(numbOfPages, currentPage);
 function updateQueryParams(selectedSort, selectedCategory, selectedPrice) {
   const url = new URL(window.location.href);
   const queryParams = new URLSearchParams(url.search);
-
+ 
   const existingCategory = queryParams.get('categoryId');
   const newCategory = selectedCategory !== '0' && selectedCategory !== undefined ? selectedCategory : existingCategory;
-
+ 
   let newPriceRange = selectedPrice !== '0' && selectedPrice !== undefined ? selectedPrice : null;
-
+ 
   if (newPriceRange !== null) {
-    queryParams.set('priceRange', newPriceRange);
+  queryParams.set('priceRange', newPriceRange);
   } else {
-    queryParams.delete('priceRange');
+  queryParams.delete('priceRange');
   }
-
-  if (newCategory !== null) {
-    queryParams.set('categoryId', newCategory);
+ 
+  if (newCategory !== null || selectedCategory === '0') {
+  queryParams.set('categoryId', newCategory);
   } else {
-    queryParams.delete('categoryId');
+  queryParams.delete('categoryId');
   }
-
+ 
   if (selectedSort) {
-    queryParams.set('sort', selectedSort);
+  queryParams.set('sort', selectedSort);
   } else {
-    queryParams.delete('sort');
+  queryParams.delete('sort');
   }
-
+ 
   url.search = queryParams.toString();
   window.history.pushState({}, '', url.toString());
   console.log(`url.search = queryParams.toString(): ${url.search}`);
-}
+ }
+ 
 
 
 function showPage(page) {
@@ -188,9 +189,7 @@ function filter(filterType) {
     } else if (filterType == 'reset'){
       selectedSort = '';
       updateQueryParams(selectedSort, selectedCategory, selectedPrice);
-      let c = document.URL.replace(window.location.search, '')
-      window.history.replaceState(history.state, '', c)
-      window.location.reload()
+      
       //showPage(toPage);
     }
   }
