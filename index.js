@@ -18,7 +18,6 @@ function updateQueryParams() {
   const url = new URL(window.location.href);
   const queryParams = new URLSearchParams(url.search);
 
-  console.log(`Inside updateQueryParams: \n selectedCategory: ${selectedCategory} selectedPrice: ${selectedPrice}`);
   queryParams.set('categoryId', selectedCategory);
   queryParams.set('priceRange', selectedPrice);
   queryParams.set('sort', selectedSort);
@@ -44,12 +43,6 @@ function filterProducts() {
 
       isCategoryMatch = selectedCategory === '0' || product.categoryId === parseInt(selectedCategory);
       isPriceMatch = checkPrice(product, selectedPrice);
-
-      console.log(`isCategoryMatch: ${isCategoryMatch}`);
-      console.log(`isPriceMatch: ${isPriceMatch}`);
-      console.log(`selectedCategory: ${selectedCategory} product.categoryId: ${product.categoryId }`);
-      console.log(`typeof(selectedCategory): ${typeof(selectedCategory)} typeof(product.categoryId): ${typeof(product.categoryId)}`);
-
     }
     
 
@@ -61,11 +54,6 @@ function filterProducts() {
   } else if (selectedSort === 'descending') {
     filteredProducts.sort((a, b) => b.price - a.price);
   }
-
-  filteredProducts.forEach(element => {
-    console.log('Element')
-    console.log(element);
-  });
   return filteredProducts;
 }
 
@@ -103,10 +91,23 @@ function renderProduct(product) {
   `;
 }
 
+// function renderProducts(products) {
+//   const html = products.map(renderProduct).join('');
+//   productList.innerHTML = html;
+// }
+
 function renderProducts(products) {
-  const html = products.map(renderProduct).join('');
+  let html = '<div class="row">';
+  products.forEach((product, index) => {
+    html += renderProduct(product);
+    if ((index + 1) % 4 === 0) {
+      html += '</div><div class="row">';
+    }
+  });
+  html += '</div>';
   productList.innerHTML = html;
 }
+
 
 function renderPagination(numbOfPages, currentPage) {
   let html = '';
