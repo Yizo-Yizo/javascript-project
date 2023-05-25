@@ -81,7 +81,7 @@ function renderProduct(product) {
   
   return `
     <div class="col-md-3">
-      <a href="./details.html?productDescription=${product.description}&productTitle=${product.title}&productPrice=${product.price}&productImage=${product.productMedia[0].url}" style="max-width: 261px">
+      <a href="./details.html?prodId=${product.prodId}" style="max-width: 261px">
         <img src="https://storage.googleapis.com/luxe_media/wwwroot/${product.productMedia[0].url}" alt="" style="width: 100%">
         <p>${product.title}</p>
         <p>$ ${product.price}</p>
@@ -90,11 +90,6 @@ function renderProduct(product) {
     </div>
   `;
 }
-
-// function renderProducts(products) {
-//   const html = products.map(renderProduct).join('');
-//   productList.innerHTML = html;
-// }
 
 function renderProducts(products) {
   let html = '<div class="row">';
@@ -112,20 +107,37 @@ function renderProducts(products) {
 function renderPagination(numbOfPages, currentPage) {
   let html = '';
 
-  if (currentPage > 1) {
+  const maxButtonsToShow = 5;
+  const halfMaxButtonsToShow = Math.floor(maxButtonsToShow / 2);
+
+  let startPage = currentPage - halfMaxButtonsToShow;
+  let endPage = currentPage + halfMaxButtonsToShow;
+
+  if (startPage < 1) {
+    startPage = 1;
+    endPage = Math.min(numbOfPages, startPage + maxButtonsToShow - 1);
+  }
+
+  if (endPage > numbOfPages) {
+    endPage = numbOfPages;
+    startPage = Math.max(1, endPage - maxButtonsToShow + 1);
+  }
+
+  if (startPage > 1) {
     html += `<li class="btn" data-page="${currentPage - 1}"><i class="bi bi-chevron-left"></i></li>`;
   }
 
-  for (let i = 1; i <= numbOfPages; i++) {
+  for (let i = startPage; i <= endPage; i++) {
     html += `<li class="numb ${currentPage === i ? 'active' : ''}" data-page="${i}"><span>${i}</span></li>`;
   }
 
-  if (currentPage < numbOfPages) {
+  if (endPage < numbOfPages) {
     html += `<li class="btn" data-page="${currentPage + 1}"><i class="bi bi-chevron-right"></i></li>`;
   }
 
   ul.innerHTML = html;
 }
+
 
 function handlePageClick(event) {
   const page = parseInt(event.target.dataset.page);

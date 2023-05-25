@@ -9,26 +9,32 @@
   <title>Details</title>
 </head>
 <body>
-  <nav class="navbar navbar-light bg-light container">
-    <div id="nav-wrap">
-      <a href="./index.html" id="logo" class="text-dark-p-0">
-        Luxe Dream Event Hire
-      </a>
-    </div>
-  </nav>
-
+  <section class="container">
+    <nav class="navbar container">
+      <div id="nav-wrap">
+        <a href="./index.html" id="logo" class="text-dark-p-0">
+          Luxe Dream Event Hire
+        </a>
+      </div>
+    </nav>
+  </section>
   <section class="container mt-5 mb-5">
-    <div class="row mb-3">
-      <div class="col-md-6">
-        <img id="productImage" class="w-100" style="height: 546px">
+    <div id="carouselExample" class="carousel-dark slide mb-5">
+      <div class="carousel-wrapper">
+        <div class="carousel-inner">
+          <!-- Carousel items will be dynamically populated here -->
+        </div>
       </div>
-      <div class="col-md-6">
-        <p id="productTitle"></p>
-        <p id="productDescription"></p>
-        <p id="productPrice"></p>
-      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
     </div>
-    <button onclick="goBack()">Back</button>
+    <button type="button" class="btn btn-dark" onclick="goBack()">Back</button>
   </section>
   
   <script src="./data.js"></script>
