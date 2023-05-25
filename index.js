@@ -1,353 +1,213 @@
+//const rawdata = require("./data");
+
 //const rawdata = require('./data.js');
-
-var paginatedProducts = [];
-var allProducts = [];
-var filteredProducts = [];
-var allProductsWithMedia = [];
-
 const productsPerPage = 12;
 let currentPage = 1;
-let toPage = 1;
-let mediaProducts = productsWithMedia().length;
-let allPages = Math.ceil(mediaProducts / productsPerPage);
-let numbOfPages = allPages;
-let isFiltered = false;
-//let selectedSort = '';
+let selectedCategory = '0';
+let selectedPrice = '0';
+let selectedSort = '';
 
-const ul = document.querySelector('ul');
+const ul = document.querySelector('.pagination');
+const productList = document.getElementById('product-list');
+const categorySelection = document.getElementById('categorySelection');
+const priceSelection = document.getElementById('priceSelection');
+const filterButtons = document.querySelectorAll('.filter-btn');
+const resetFilterButton = document.querySelector('.reset-filter-btn');
 
-let _filterType;
-
-pagination(numbOfPages, currentPage);
-
-function updateQueryParams(selectedSort, selectedCategory, selectedPrice) {
+function updateQueryParams() {
   const url = new URL(window.location.href);
   const queryParams = new URLSearchParams(url.search);
- 
-  const existingCategory = queryParams.get('categoryId');
-  const newCategory = selectedCategory !== '0' && selectedCategory !== undefined ? selectedCategory : existingCategory;
- 
-  let newPriceRange = selectedPrice !== '0' && selectedPrice !== undefined ? selectedPrice : null;
- 
-  if (newPriceRange !== null) {
-  queryParams.set('priceRange', newPriceRange);
-  } else {
-  queryParams.delete('priceRange');
-  }
- 
-  if (newCategory !== null || selectedCategory === '0') {
-  queryParams.set('categoryId', newCategory);
-  } else {
-  queryParams.delete('categoryId');
-  }
- 
-  if (selectedSort) {
+
+  console.log(`Inside updateQueryParams: \n selectedCategory: ${selectedCategory} selectedPrice: ${selectedPrice}`);
+  queryParams.set('categoryId', selectedCategory);
+  queryParams.set('priceRange', selectedPrice);
   queryParams.set('sort', selectedSort);
-  } else {
-  queryParams.delete('sort');
-  }
- 
+
   url.search = queryParams.toString();
   window.history.pushState({}, '', url.toString());
-  console.log(`url.search = queryParams.toString(): ${url.search}`);
- }
- 
+}
 
+function updateFilterSelections() {
+  categorySelection.value = selectedCategory;
+  priceSelection.value = selectedPrice;
+}
 
-function showPage(page) {
+function filterProducts() {
+  let isCategoryMatch;
+  let isPriceMatch; 
+  let filteredProducts = rawdata.filter(product => {
+    if (!product.productMedia || product.productMedia.length === 0) {
+      return false; // Skip products without media
+    }
 
-  const url = new URL(window.location.href);
-  const queryParams = url.searchParams;
+    if (product.productMedia[0]){
 
-  const selectedCategory = queryParams.get('categoryId') || '0';
-  const selectedPrice = queryParams.get('priceRange') || '0';
-  const selectedSort = queryParams.get('sort') || '';
-  // console.log(`url: ${url}`);
-  // console.log(`queryParams: ${queryParams}`);
-  // console.log(`selectedCategory: ${selectedCategory}`);
-  // console.log(`selectedPrice: ${selectedPrice}`);
-  // console.log(`selectedSort: ${selectedSort}`);
+      isCategoryMatch = selectedCategory === '0' || product.categoryId === parseInt(selectedCategory);
+      isPriceMatch = checkPrice(product, selectedPrice);
 
-  document.getElementById('categorySelection').value = selectedCategory;
-  document.getElementById('priceSelection').value = selectedPrice;
+      console.log(`isCategoryMatch: ${isCategoryMatch}`);
+      console.log(`isPriceMatch: ${isPriceMatch}`);
+      console.log(`selectedCategory: ${selectedCategory} product.categoryId: ${product.categoryId }`);
+      console.log(`typeof(selectedCategory): ${typeof(selectedCategory)} typeof(product.categoryId): ${typeof(product.categoryId)}`);
 
-  updateQueryParams(selectedSort, selectedCategory, selectedPrice)
+    }
+    
 
-  var items = productsWithMedia();
-
-  toPage = page;
-  let start = (page - 1) * productsPerPage;
-  let end = start + productsPerPage;
-
-  let select = document.getElementById("categorySelection");
-  rawdata[0].prodType.productCategory.forEach(product => {
-    const option = document.createElement("option");
-    option.value = product.categoryId;
-    option.text = product.categoryName;
-    select.add(option);
+    return isCategoryMatch && isPriceMatch;
   });
 
-  if ((_filterType == 'category')|| (_filterType == 'price')) {
-    if (page <= 1){
-      start = 0; 
-      end = 12;
-      paginatedProducts = []
-      paginatedProducts = allProducts.slice(start, end);
-    }else {
-      paginatedProducts = [];
-      paginatedProducts = allProducts.slice(start, end);
-    }
-  }
-  else {
-    if (page <= 1){
-      start = 0;
-      end = 12;
-      paginatedProducts = [];
-      paginatedProducts = items.slice(start, end);
-    }else{
-      paginatedProducts = [];
-      paginatedProducts = items.slice(start, end);
-    }
-
+  if (selectedSort === 'ascending') {
+    filteredProducts.sort((a, b) => a.price - b.price);
+  } else if (selectedSort === 'descending') {
+    filteredProducts.sort((a, b) => b.price - a.price);
   }
 
-  updateUI(paginatedProducts);
-
-  if (selectedSort == 'ascending' || selectedSort == 'descending' || selectedSort == 'reset'){
-    filter(selectedSort);
-  }
+  filteredProducts.forEach(element => {
+    console.log('Element')
+    console.log(element);
+  });
+  return filteredProducts;
 }
 
-function filter(filterType) {
-  isFiltered = true;
-  _filterType = filterType;
-  var categorySelection = document.getElementById('categorySelection');
-  let selectedCategory = categorySelection.options[categorySelection.selectedIndex].value;
 
-  var priceSelection = document.getElementById('priceSelection');
-  let selectedPrice = priceSelection.options[priceSelection.selectedIndex].value;
 
-  let selectedSort;
-  if (_filterType == 'category' || _filterType == 'price') {
-    selectedSort = '';
-    updateQueryParams(selectedSort, selectedCategory, selectedPrice);
-  } else {
-    selectedSort = _filterType;
-    updateQueryParams(selectedSort, selectedCategory, selectedPrice);
-  }
-
-  let start = (toPage - 1) * productsPerPage;
-  let end = start + productsPerPage;
-
-  allProducts = [];
-  filteredProducts = [];
-
-  if (filterType == 'category' || filterType == 'price'){
-    var items = productsWithMedia();
-    var uniqueItems = [...new Set(items)];
-    for (const data of uniqueItems)  {
-      if (selectedCategory === '0' || data.categoryId == selectedCategory) {
-        if ((filterType === 'category' && checkPrice(data, selectedPrice)) || (filterType === 'price' && checkPrice(data, selectedPrice))) {
-          allProducts.push(data);
-        }
-      }
-    }
-
-    let products = [];
-    if (allProducts.length < 12){
-      products = allProducts;
-    }
-    else {
-      if (isNaN(start)){
-        products = allProducts.slice(0, 12);
-      }
-      else {
-        products = allProducts.slice(start, end);
-      }
-    }
-
-    for (const product of products) {
-      filteredProducts.push(product);
-    }
-
-    if (selectedCategory != 0 || selectedPrice != 0){
-      numbOfPages = Math.ceil(allProducts.length / productsPerPage);
-    }else {
-      numbOfPages = allPages;
-    }
-    pagination(numbOfPages, currentPage);
-  }
-  else if (filterType == 'ascending' || filterType == 'descending' || filterType == 'reset') {
-    if (filterType == 'ascending') {
-      selectedSort = 'ascending';
-      paginatedProducts.sort((a, b) => a.price - b.price);
-      updateUI(paginatedProducts);
-    } else if (filterType == 'descending') {
-      selectedSort = 'descending';
-      paginatedProducts.sort((a, b) => b.price - a.price);
-      updateUI(paginatedProducts);
-    } else if (filterType == 'reset'){
-      selectedSort = '';
-      updateQueryParams(selectedSort, selectedCategory, selectedPrice);
-      
-      //showPage(toPage);
-    }
-  }
-}
-
-function productsWithMedia() {
-  for (const data of rawdata) {
-    if (data.productMedia[0]) {
-      allProductsWithMedia.push(data);
-    }
-  }
-
-  return allProductsWithMedia;
-}
-
-function checkPrice(data, selectedPrice) {
-  switch(selectedPrice) {
+function checkPrice(product, selectedPrice) {
+  const price = product.price;
+  switch (selectedPrice) {
     case '0':
       return true;
     case '1':
-      return data.price > 0 && data.price <= 100;
+      return price > 0 && price <= 100;
     case '2':
-      return data.price > 100 && data.price <= 500;
+      return price > 100 && price <= 500;
     case '3':
-      return data.price > 500 && data.price <= 1000;
+      return price > 500 && price <= 1000;
     case '4':
-      return data.price > 1000;
+      return price > 1000;
     default:
       return false;
   }
 }
 
-function updateUI(products) {
-
-  let data = '<div class="row">';
-
-  for (const product of products) {
-    data += 
-      `<div class="col-md-3">
-        <a href="./details.html?productDescription=${product.description}&productTitle=${product.title}&productPrice=${product.price}&productImage=${product.productMedia[0].url}" style="max-width: 261px">
-          <img src="https://storage.googleapis.com/luxe_media/wwwroot/${product.productMedia[0].url}" alt="" style="width: 100%">
-          <p>${product.title}</p>
-          <p>$ ${product.price}</p>
-        </a>
-        <hr/>
-      </div>
-      `;
-  }
-
-  data += '</div>';
-
-  document.getElementById('target').innerHTML = data;
+function renderProduct(product) {
+  
+  return `
+    <div class="col-md-3">
+      <a href="./details.html?productDescription=${product.description}&productTitle=${product.title}&productPrice=${product.price}&productImage=${product.productMedia[0].url}" style="max-width: 261px">
+        <img src="https://storage.googleapis.com/luxe_media/wwwroot/${product.productMedia[0].url}" alt="" style="width: 100%">
+        <p>${product.title}</p>
+        <p>$ ${product.price}</p>
+      </a>
+      <hr/>
+    </div>
+  `;
 }
 
-// function pagination(numbOfPages, currentPage) {
-  
-//   let li = '';
+function renderProducts(products) {
+  const html = products.map(renderProduct).join('');
+  productList.innerHTML = html;
+}
 
-//   let beforePages = currentPage - 5;
-//   let afterPages = currentPage + 5;
-//   let liActive;
-
-//   if (currentPage > 1) {
-//     li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
-//   }
-
-//   for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
-    
-//     if (productsPerPage > numbOfPages){
-//       continue;
-//     }
-//     if (productsPerPage == 0){
-//       productsPerPage = productsPerPage + 1;
-//     }
-
-//     if (currentPage == productsPerPage){
-//       liActive = 'active';
-//     }else {
-//       liActive = '';
-//     }
-
-//     li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${currentPage})"><span>${productsPerPage}</span></li>`;
-//   }
-
-//   if (currentPage < numbOfPages){
-//     li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage+1})"><i class="bi bi-chevron-right"></i></li>`;
-//   }
-
-//   ul.innerHTML = li;
-//   showPage(currentPage);
-// }
-
-function pagination(numbOfPages, currentPage) {
-  
-  let li = '';
-  let beforePages;
-
-  if (currentPage < 5){
-    beforePages = currentPage - 1;
-  }else {
-    beforePages = currentPage - 5;
-  }
-  let afterPages = currentPage + 5;
-  let liActive;
+function renderPagination(numbOfPages, currentPage) {
+  let html = '';
 
   if (currentPage > 1) {
-    li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage-1})"><i class="bi bi-chevron-left"></i></li>`;
+    html += `<li class="btn" data-page="${currentPage - 1}"><i class="bi bi-chevron-left"></i></li>`;
   }
 
-  for (let productsPerPage = beforePages; productsPerPage <= afterPages; productsPerPage++){
-
-    if (productsPerPage > numbOfPages){
-      continue;
-    }
-    if (productsPerPage == 0){
-      productsPerPage = productsPerPage + 1;
-    }
-
-    if (currentPage == productsPerPage){
-      liActive = 'active';
-    }else {
-      liActive = '';
-    }
-
-    li += `<li class="numb ${liActive}" onclick="pagination(${numbOfPages}, ${productsPerPage})"><span>${productsPerPage}</span></li>`;
+  for (let i = 1; i <= numbOfPages; i++) {
+    html += `<li class="numb ${currentPage === i ? 'active' : ''}" data-page="${i}"><span>${i}</span></li>`;
   }
 
-  if (currentPage < numbOfPages){
-    li += `<li class="btn" onclick="pagination(${numbOfPages}, ${currentPage+1})"><i class="bi bi-chevron-right"></i></li>`;
+  if (currentPage < numbOfPages) {
+    html += `<li class="btn" data-page="${currentPage + 1}"><i class="bi bi-chevron-right"></i></li>`;
   }
 
-  ul.innerHTML = li;
-  showPage(currentPage);
+  ul.innerHTML = html;
 }
 
-
-window.addEventListener('load', function () {
-  const url = new URL(window.location.href);
-  const queryParams = new URLSearchParams(url.search);
-  let para = url.search.substring(1)
-
-  const selectedCategory = queryParams.get('categoryId') || '0';
-  const selectedPrice = queryParams.get('priceRange') || '0';
-  const selectedSort = queryParams.get('sort') || '';
-
-  console.log(`url: ${url}`);
-  console.log(`queryParams: ${queryParams}`);
-  console.log(`para: ${para}`);
-
-  document.getElementById('categorySelection').value = selectedCategory;
-  document.getElementById('priceSelection').value = selectedPrice;
-
-  if (selectedCategory !== '0' || selectedPrice !== '0') {
-    filter(selectedCategory !== '0' ? 'category' : 'price');
+function handlePageClick(event) {
+  const page = parseInt(event.target.dataset.page);
+  if (!isNaN(page) && page !== currentPage) {
+    currentPage = page;
+    showPage();
   }
+}
+
+function handleCategoryChange(event) {
+  selectedCategory = event.target.value;
+  currentPage = 1;
+  showPage();
+}
+
+function handlePriceChange(event) {
+  selectedPrice = event.target.value;
+  currentPage = 1;
+  showPage();
+}
+
+function handleFilterButtonClick(event) {
+  selectedSort = event.target.dataset.filter;
+  currentPage = 1;
+  showPage();
+}
+
+function handleResetFilterButtonClick() {
+  selectedCategory = '0';
+  selectedPrice = '0';
+  selectedSort = '';
+  currentPage = 1;
+  updateFilterSelections();
+  showPage();
+}
+
+function showPage() {
   
-  if (selectedSort) {
-    filter(selectedSort);
-  }
-});
+  updateQueryParams();
+  
+  const filteredProducts = filterProducts();
+  const numbOfPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
+  renderProducts(currentProducts);
+  renderPagination(numbOfPages, currentPage);
+}
+
+function populateCategoryDropdown() {
+  const select = document.getElementById("categorySelection");
+  const categories = rawdata[0].prodType.productCategory;
+  
+  categories.forEach(category => {
+    const option = document.createElement("option");
+    option.value = category.categoryId;
+    option.text = category.categoryName;
+    select.add(option);
+  });
+}
+
+function initialize() {
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const categoryId = urlParams.get('categoryId');
+  const priceRange = urlParams.get('priceRange');
+  const sort = urlParams.get('sort');
+
+  selectedCategory = categoryId || '0';
+  selectedPrice = priceRange || '0';
+  selectedSort = sort || '';
+
+  populateCategoryDropdown();
+  updateFilterSelections();
+
+  categorySelection.addEventListener('change', handleCategoryChange);
+  priceSelection.addEventListener('change', handlePriceChange);
+  filterButtons.forEach(btn => btn.addEventListener('click', handleFilterButtonClick));
+  resetFilterButton.addEventListener('click', handleResetFilterButtonClick);
+  ul.addEventListener('click', handlePageClick);
+
+  showPage();
+}
+
+initialize();
