@@ -77,3 +77,12 @@ img {
   display: flex;
   justify-content: center;
 }
+
+.carousel-inner  img{
+  height: 700px;
+  width: 700px;
+}
+
+#productTitle{
+  font-size: 20px;
+}

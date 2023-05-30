@@ -10,21 +10,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const selectedProduct = rawdata.find(product => product.prodId === parseInt(prodId));
 
-  const productsCategory = selectedProduct.prodType.productCategory;
+  const productImages = selectedProduct.productMedia;
+
+  const title = selectedProduct.title;
+  const description = selectedProduct.description;
+  const price = selectedProduct.price;
+
+  document.getElementById('productTitle').textContent = title;
+  document.getElementById('productPrice').textContent = '$ ' + price;
+  document.getElementById('productDescription').textContent = 'Description' + description;
+
+  console.log(`Title: ${title} \n Description: ${description} \n Price: ${price}`);
 
   //const desiredProduct = rawdata.find(product => product.prodId === prodIdToFind);
 
-  console.log(productsCategory);
+  console.log(productImages);
   const carouselInner = document.querySelector('.carousel-inner');
 
   // 2. Generate HTML for each product
-  const productsHTML = productsCategory.map((product, index) => {
+  const productsHTML = productImages.map((product, index) => {
     const isActive = index === 0 ? 'active' : ''; // Add 'active' class to the first item
 
     return `
     <div class="carousel-item ${isActive}">
-      <h3>${product.categoryName}</h3>
-      <!-- Add other product details as needed -->
+    <img src="https://storage.googleapis.com/luxe_media/wwwroot/${product.url}" class="d-block w-100" >
     </div>
     `;
   });
