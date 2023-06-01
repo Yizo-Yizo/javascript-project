@@ -18,13 +18,28 @@ function updateQueryParams() {
   const url = new URL(window.location.href);
   const queryParams = new URLSearchParams(url.search);
 
-  queryParams.set('categoryId', selectedCategory);
-  queryParams.set('priceRange', selectedPrice);
-  queryParams.set('sort', selectedSort);
+  if (selectedCategory !== '0') {
+    queryParams.set('categoryId', selectedCategory);
+  } else {
+    queryParams.delete('categoryId');
+  }
+
+  if (selectedPrice !== '0') {
+    queryParams.set('priceRange', selectedPrice);
+  } else {
+    queryParams.delete('priceRange');
+  }
+
+  if (selectedSort !== '') {
+    queryParams.set('sort', selectedSort);
+  } else {
+    queryParams.delete('sort');
+  }
 
   url.search = queryParams.toString();
   window.history.pushState({}, '', url.toString());
 }
+
 
 function updateFilterSelections() {
   categorySelection.value = selectedCategory;
