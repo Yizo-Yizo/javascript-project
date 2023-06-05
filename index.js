@@ -40,7 +40,6 @@ function updateQueryParams() {
   window.history.pushState({}, '', url.toString());
 }
 
-
 function updateFilterSelections() {
   categorySelection.value = selectedCategory;
   priceSelection.value = selectedPrice;
@@ -71,8 +70,6 @@ function filterProducts() {
   }
   return filteredProducts;
 }
-
-
 
 function checkPrice(product, selectedPrice) {
   const price = product.price;
@@ -118,7 +115,6 @@ function renderProducts(products) {
   productList.innerHTML = html;
 }
 
-
 function renderPagination(numbOfPages, currentPage) {
   let html = '';
 
@@ -138,7 +134,7 @@ function renderPagination(numbOfPages, currentPage) {
     startPage = Math.max(1, endPage - maxButtonsToShow + 1);
   }
 
-  if (startPage > 1) {
+  if (currentPage > 1) {
     html += `<li class="btn" data-page="${currentPage - 1}"><i class="bi bi-chevron-left"></i></li>`;
   }
 
@@ -146,10 +142,10 @@ function renderPagination(numbOfPages, currentPage) {
     html += `<li class="numb ${currentPage === i ? 'active' : ''}" data-page="${i}"><span>${i}</span></li>`;
   }
 
-  if (endPage < numbOfPages) {
+  if (currentPage < numbOfPages) {
     html += `<li class="btn" data-page="${currentPage + 1}"><i class="bi bi-chevron-right"></i></li>`;
   }
-
+  
   ul.innerHTML = html;
 }
 
