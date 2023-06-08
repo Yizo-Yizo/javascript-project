@@ -14,6 +14,8 @@ const priceSelection = document.getElementById('priceSelection');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const resetFilterButton = document.querySelector('.reset-filter-btn');
 
+initialize();
+
 function updateQueryParams() {
   const url = new URL(window.location.href);
   const queryParams = new URLSearchParams(url.search);
@@ -149,11 +151,15 @@ function renderPagination(numbOfPages, currentPage) {
   ul.innerHTML = html;
 }
 
-
 function handlePageClick(event) {
-  const page = parseInt(event.target.dataset.page);
+  let target = event.target;
+  if (target.tagName !== 'li') {
+    target = target.closest('li');
+  }
+  const page = parseInt(target.dataset.page);
   if (!isNaN(page) && page !== currentPage) {
     currentPage = page;
+    console.log(`currentPage: ${currentPage}`);
     showPage();
   }
 }
@@ -234,4 +240,4 @@ function initialize() {
   showPage();
 }
 
-initialize();
+
